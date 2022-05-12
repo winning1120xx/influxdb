@@ -36,9 +36,9 @@ func init() {
 	)
 	// TODO(lesam): re-enable MergeFilterRule once it works with complex use cases
 	// such as filter() |> geo.strictFilter(). See geo_merge_filter flux test.
-	//plan.RegisterLogicalRules(
+	// plan.RegisterLogicalRules(
 	//	MergeFiltersRule{},
-	//)
+	// )
 }
 
 type FromStorageRule struct{}
@@ -63,7 +63,8 @@ func (rule FromStorageRule) Rewrite(ctx context.Context, node plan.Node) (plan.N
 	}
 
 	return plan.CreateLogicalNode("fromStorage", &FromStorageProcedureSpec{
-		Bucket: fromSpec.Bucket,
+		Bucket:  fromSpec.Bucket,
+		Preview: fromSpec.Preview,
 	}), true, nil
 }
 
@@ -126,6 +127,7 @@ func (rule PushDownRangeRule) Rewrite(ctx context.Context, node plan.Node) (plan
 		Bucket:   fromSpec.Bucket.Name,
 		BucketID: fromSpec.Bucket.ID,
 		Bounds:   rangeSpec.Bounds,
+		Preview:  fromSpec.Preview,
 	}), true, nil
 }
 

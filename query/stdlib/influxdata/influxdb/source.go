@@ -8,6 +8,7 @@ import (
 	"github.com/influxdata/flux"
 	"github.com/influxdata/flux/codes"
 	"github.com/influxdata/flux/execute"
+	"github.com/influxdata/flux/interpreter"
 	"github.com/influxdata/flux/memory"
 	"github.com/influxdata/flux/metadata"
 	"github.com/influxdata/flux/plan"
@@ -176,6 +177,11 @@ func createReadFilterSource(s plan.ProcedureSpec, id execute.DatasetID, a execut
 		return nil, err
 	}
 
+	preview := spec.Preview
+	if v, ok := interpreter.GetOption(ctx, "universe", "preview"); ok {
+		preview = v.Bool()
+	}
+
 	return ReadFilterSource(
 		id,
 		deps.Reader,
@@ -184,6 +190,7 @@ func createReadFilterSource(s plan.ProcedureSpec, id execute.DatasetID, a execut
 			BucketID:       bucketID,
 			Bounds:         *bounds,
 			Predicate:      spec.Filter,
+			Preview:        preview,
 		},
 		a,
 	), nil

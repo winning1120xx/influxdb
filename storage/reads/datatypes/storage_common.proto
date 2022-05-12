@@ -10,6 +10,7 @@ message ReadFilterRequest {
   google.protobuf.Any ReadSource = 1;
   TimestampRange range = 2;
   Predicate predicate = 3;
+  bool preview = 4;
 }
 
 message ReadGroupRequest {

@@ -29,6 +29,20 @@ func newLimitArrayCursor(cur cursors.Cursor) cursors.Cursor {
 	}
 }
 
+// newBlockLimitArrayCursor wraps an existing cursor and restricts the number
+// of blocks it can return. It does not restrict the number of points in each
+// block, but this is assumed to match MaxPointsPerBlock.
+func newBlockLimitArrayCursor(cur cursors.Cursor, limit int) cursors.Cursor {
+	switch cur := cur.(type) {
+{{range .}}{{/* every type supports block limit */}}
+	case cursors.{{.Name}}ArrayCursor:
+		return new{{.Name}}BlockLimitArrayCursor(cur, limit)
+{{end}}
+	default:
+		panic(fmt.Sprintf("unreachable: %T", cur))
+	}
+}
+
 func newWindowFirstArrayCursor(cur cursors.Cursor, window interval.Window) cursors.Cursor {
 	if window.IsZero() {
 		return newLimitArrayCursor(cur)
@@ -315,6 +329,26 @@ func (c *{{.name}}LimitArrayCursor) Next() {{$arrayType}} {
 	c.res.Timestamps[0] = a.Timestamps[0]
 	c.res.Values[0] = a.Values[0]
 	return c.res
+}
+
+type {{.name}}BlockLimitArrayCursor struct {
+	cursors.{{.Name}}ArrayCursor
+	limit int
+}
+
+func new{{.Name}}BlockLimitArrayCursor(cur cursors.{{.Name}}ArrayCursor, limit int) *{{.name}}BlockLimitArrayCursor {
+	return &{{.name}}BlockLimitArrayCursor{
+		{{.Name}}ArrayCursor: cur,
+		limit: limit,
+	}
+}
+
+func (c *{{.name}}BlockLimitArrayCursor) Next() {{$arrayType}} {
+	if c.limit == 0 {
+		return &cursors.{{.Name}}Array{}
+	}
+	c.limit--
+	return c.{{.Name}}ArrayCursor.Next()
 }
 
 type {{.name}}WindowLastArrayCursor struct {

@@ -34,6 +34,7 @@ type ReadFilterSpec struct {
 
 	Bounds    execute.Bounds
 	Predicate *datatypes.Predicate
+	Preview   bool
 }
 
 type ReadGroupSpec struct {

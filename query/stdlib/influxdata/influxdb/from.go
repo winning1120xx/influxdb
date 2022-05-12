@@ -17,7 +17,8 @@ type (
 )
 
 type FromStorageProcedureSpec struct {
-	Bucket influxdb.NameOrID
+	Bucket  influxdb.NameOrID
+	Preview bool
 }
 
 func (s *FromStorageProcedureSpec) Kind() plan.ProcedureKind {

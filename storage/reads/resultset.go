@@ -68,3 +68,33 @@ func (r *resultSet) Tags() models.Tags {
 // Stats returns the stats for the underlying cursors.
 // Available after resultset has been scanned.
 func (r *resultSet) Stats() cursors.CursorStats { return r.seriesRow.Query.Stats() }
+
+type limitResultSet struct {
+	ResultSet
+	blockLimit  int
+	seriesLimit int
+}
+
+func NewLimitResultSet(rs ResultSet, blockLimit, seriesLimit int) ResultSet {
+	return &limitResultSet{
+		ResultSet:   rs,
+		blockLimit:  blockLimit,
+		seriesLimit: seriesLimit,
+	}
+}
+
+func (r *limitResultSet) Next() bool {
+	if r.seriesLimit == 0 {
+		return false
+	}
+	r.seriesLimit--
+	return r.ResultSet.Next()
+}
+
+func (r *limitResultSet) Cursor() cursors.Cursor {
+	cur := r.ResultSet.Cursor()
+	if cur == nil {
+		return cur
+	}
+	return newBlockLimitArrayCursor(cur, r.blockLimit)
+}

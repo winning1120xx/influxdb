@@ -47,6 +47,32 @@ func newLimitArrayCursor(cur cursors.Cursor) cursors.Cursor {
 	}
 }
 
+// newBlockLimitArrayCursor wraps an existing cursor and restricts the number
+// of blocks it can return. It does not restrict the number of points in each
+// block, but this is assumed to match MaxPointsPerBlock.
+func newBlockLimitArrayCursor(cur cursors.Cursor, limit int) cursors.Cursor {
+	switch cur := cur.(type) {
+
+	case cursors.FloatArrayCursor:
+		return newFloatBlockLimitArrayCursor(cur, limit)
+
+	case cursors.IntegerArrayCursor:
+		return newIntegerBlockLimitArrayCursor(cur, limit)
+
+	case cursors.UnsignedArrayCursor:
+		return newUnsignedBlockLimitArrayCursor(cur, limit)
+
+	case cursors.StringArrayCursor:
+		return newStringBlockLimitArrayCursor(cur, limit)
+
+	case cursors.BooleanArrayCursor:
+		return newBooleanBlockLimitArrayCursor(cur, limit)
+
+	default:
+		panic(fmt.Sprintf("unreachable: %T", cur))
+	}
+}
+
 func newWindowFirstArrayCursor(cur cursors.Cursor, window interval.Window) cursors.Cursor {
 	if window.IsZero() {
 		return newLimitArrayCursor(cur)
@@ -367,6 +393,26 @@ func (c *floatLimitArrayCursor) Next() *cursors.FloatArray {
 	c.res.Timestamps[0] = a.Timestamps[0]
 	c.res.Values[0] = a.Values[0]
 	return c.res
+}
+
+type floatBlockLimitArrayCursor struct {
+	cursors.FloatArrayCursor
+	limit int
+}
+
+func newFloatBlockLimitArrayCursor(cur cursors.FloatArrayCursor, limit int) *floatBlockLimitArrayCursor {
+	return &floatBlockLimitArrayCursor{
+		FloatArrayCursor: cur,
+		limit:            limit,
+	}
+}
+
+func (c *floatBlockLimitArrayCursor) Next() *cursors.FloatArray {
+	if c.limit == 0 {
+		return &cursors.FloatArray{}
+	}
+	c.limit--
+	return c.FloatArrayCursor.Next()
 }
 
 type floatWindowLastArrayCursor struct {
@@ -1248,6 +1294,26 @@ func (c *integerLimitArrayCursor) Next() *cursors.IntegerArray {
 	return c.res
 }
 
+type integerBlockLimitArrayCursor struct {
+	cursors.IntegerArrayCursor
+	limit int
+}
+
+func newIntegerBlockLimitArrayCursor(cur cursors.IntegerArrayCursor, limit int) *integerBlockLimitArrayCursor {
+	return &integerBlockLimitArrayCursor{
+		IntegerArrayCursor: cur,
+		limit:              limit,
+	}
+}
+
+func (c *integerBlockLimitArrayCursor) Next() *cursors.IntegerArray {
+	if c.limit == 0 {
+		return &cursors.IntegerArray{}
+	}
+	c.limit--
+	return c.IntegerArrayCursor.Next()
+}
+
 type integerWindowLastArrayCursor struct {
 	cursors.IntegerArrayCursor
 	windowEnd int64
@@ -2125,6 +2191,26 @@ func (c *unsignedLimitArrayCursor) Next() *cursors.UnsignedArray {
 	c.res.Timestamps[0] = a.Timestamps[0]
 	c.res.Values[0] = a.Values[0]
 	return c.res
+}
+
+type unsignedBlockLimitArrayCursor struct {
+	cursors.UnsignedArrayCursor
+	limit int
+}
+
+func newUnsignedBlockLimitArrayCursor(cur cursors.UnsignedArrayCursor, limit int) *unsignedBlockLimitArrayCursor {
+	return &unsignedBlockLimitArrayCursor{
+		UnsignedArrayCursor: cur,
+		limit:               limit,
+	}
+}
+
+func (c *unsignedBlockLimitArrayCursor) Next() *cursors.UnsignedArray {
+	if c.limit == 0 {
+		return &cursors.UnsignedArray{}
+	}
+	c.limit--
+	return c.UnsignedArrayCursor.Next()
 }
 
 type unsignedWindowLastArrayCursor struct {
@@ -3006,6 +3092,26 @@ func (c *stringLimitArrayCursor) Next() *cursors.StringArray {
 	return c.res
 }
 
+type stringBlockLimitArrayCursor struct {
+	cursors.StringArrayCursor
+	limit int
+}
+
+func newStringBlockLimitArrayCursor(cur cursors.StringArrayCursor, limit int) *stringBlockLimitArrayCursor {
+	return &stringBlockLimitArrayCursor{
+		StringArrayCursor: cur,
+		limit:             limit,
+	}
+}
+
+func (c *stringBlockLimitArrayCursor) Next() *cursors.StringArray {
+	if c.limit == 0 {
+		return &cursors.StringArray{}
+	}
+	c.limit--
+	return c.StringArrayCursor.Next()
+}
+
 type stringWindowLastArrayCursor struct {
 	cursors.StringArrayCursor
 	windowEnd int64
@@ -3428,6 +3534,26 @@ func (c *booleanLimitArrayCursor) Next() *cursors.BooleanArray {
 	c.res.Timestamps[0] = a.Timestamps[0]
 	c.res.Values[0] = a.Values[0]
 	return c.res
+}
+
+type booleanBlockLimitArrayCursor struct {
+	cursors.BooleanArrayCursor
+	limit int
+}
+
+func newBooleanBlockLimitArrayCursor(cur cursors.BooleanArrayCursor, limit int) *booleanBlockLimitArrayCursor {
+	return &booleanBlockLimitArrayCursor{
+		BooleanArrayCursor: cur,
+		limit:              limit,
+	}
+}
+
+func (c *booleanBlockLimitArrayCursor) Next() *cursors.BooleanArray {
+	if c.limit == 0 {
+		return &cursors.BooleanArray{}
+	}
+	c.limit--
+	return c.BooleanArrayCursor.Next()
 }
 
 type booleanWindowLastArrayCursor struct {

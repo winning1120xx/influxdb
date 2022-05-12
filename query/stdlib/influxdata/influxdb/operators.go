@@ -61,6 +61,9 @@ type ReadRangePhysSpec struct {
 	Filter *datatypes.Predicate
 
 	Bounds flux.Bounds
+
+	// Preview marks that we only want a preview of the data.
+	Preview bool
 }
 
 func (s *ReadRangePhysSpec) Kind() plan.ProcedureKind {

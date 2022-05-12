@@ -161,6 +161,7 @@ func (fi *filterIterator) Do(f func(flux.Table) error) error {
 		Start: int64(fi.spec.Bounds.Start),
 		End:   int64(fi.spec.Bounds.Stop),
 	}
+	req.Preview = fi.spec.Preview
 
 	rs, err := fi.s.ReadFilter(fi.ctx, &req)
 	if err != nil {
